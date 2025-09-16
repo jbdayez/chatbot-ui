@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz sur les arnaques numériques</title>
+    <style>
+      :root {
+        color-scheme: light dark;
+        font-family: "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f0f4f8;
+        color: #1f2933;
+      }
+
+      main {
+        background: #ffffff;
+        box-shadow: 0 10px 40px rgba(15, 23, 42, 0.1);
+        padding: 2.5rem 2rem;
+        border-radius: 1.25rem;
+        max-width: 760px;
+        width: min(90vw, 760px);
+      }
+
+      h1 {
+        margin-top: 0;
+        text-align: center;
+        font-size: clamp(1.8rem, 2.5vw + 1rem, 2.6rem);
+        color: #0f172a;
+      }
+
+      p.intro {
+        text-align: center;
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+      }
+
+      fieldset {
+        margin-bottom: 1.75rem;
+        padding: 1.25rem 1.5rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 1rem;
+        background: #f8fafc;
+      }
+
+      legend {
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+        padding: 0 0.5rem;
+      }
+
+      .options {
+        display: flex;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+      }
+
+      label {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+
+      .feedback {
+        margin-top: 0.75rem;
+        font-style: italic;
+        min-height: 1.5rem;
+      }
+
+      .feedback.correct {
+        color: #0f766e;
+      }
+
+      .feedback.incorrect {
+        color: #b91c1c;
+      }
+
+      .feedback.unanswered {
+        color: #b45309;
+      }
+
+      button {
+        display: block;
+        margin: 0 auto;
+        background: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 999px;
+        padding: 0.9rem 2.25rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 12px 24px rgba(37, 99, 235, 0.24);
+      }
+
+      button:active {
+        transform: translateY(0);
+        box-shadow: none;
+      }
+
+      #result {
+        margin-top: 2.5rem;
+        text-align: center;
+        font-size: 1.25rem;
+        font-weight: 600;
+      }
+
+      #result p {
+        margin: 0.35rem 0;
+      }
+
+      .score {
+        font-size: clamp(1.5rem, 3vw, 2.25rem);
+        color: #1d4ed8;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #0f172a;
+          color: #e2e8f0;
+        }
+
+        main {
+          background: #1e293b;
+          box-shadow: none;
+        }
+
+        fieldset {
+          border-color: #334155;
+          background: #0f172a;
+        }
+
+        legend {
+          color: #f8fafc;
+        }
+
+        label {
+          color: #e2e8f0;
+        }
+
+        button {
+          background: #38bdf8;
+          color: #0f172a;
+        }
+
+        .score {
+          color: #38bdf8;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Quiz &mdash; Démasquez les arnaques numériques&nbsp;!</h1>
+      <p class="intro">
+        Répondez aux 10 questions vrai ou faux pour tester vos connaissances sur
+        les pratiques frauduleuses en ligne. Cliquez sur «&nbsp;Valider mes
+        réponses&nbsp;» pour découvrir votre score.
+      </p>
+
+      <form id="quiz-form" novalidate></form>
+
+      <button type="submit" form="quiz-form">Valider mes réponses</button>
+
+      <section id="result" aria-live="polite"></section>
+    </main>
+
+    <script>
+      const quizData = [
+        {
+          text:
+            "Un message qui vous presse d'agir immédiatement est souvent un signe d'arnaque.",
+          answer: true,
+        },
+        {
+          text:
+            "Un site sécurisé affichant le cadenas dans la barre d'adresse est forcément fiable.",
+          answer: false,
+        },
+        {
+          text:
+            "Les banques demandent parfois de confirmer votre mot de passe par e-mail.",
+          answer: false,
+        },
+        {
+          text:
+            "Une offre qui semble trop belle pour être vraie mérite d'être vérifiée avant de payer.",
+          answer: true,
+        },
+        {
+          text:
+            "Il est risqué de cliquer sur un lien reçu par SMS d'un numéro inconnu.",
+          answer: true,
+        },
+        {
+          text:
+            "Les escrocs utilisent souvent des fautes d'orthographe pour vous piéger volontairement.",
+          answer: false,
+        },
+        {
+          text:
+            "Un réseau Wi-Fi public peut être utilisé pour intercepter vos données sensibles.",
+          answer: true,
+        },
+        {
+          text:
+            "Vérifier l'adresse e-mail de l'expéditeur aide à repérer une tentative de phishing.",
+          answer: true,
+        },
+        {
+          text:
+            "Un influenceur populaire qui demande de l'argent en échange d'un gain garanti est digne de confiance.",
+          answer: false,
+        },
+        {
+          text:
+            "Activer l'authentification à deux facteurs réduit le risque d'intrusion sur vos comptes.",
+          answer: true,
+        },
+      ];
+
+      const quizForm = document.getElementById("quiz-form");
+      const resultContainer = document.getElementById("result");
+
+      function createQuestionItem(question, index) {
+        const fieldset = document.createElement("fieldset");
+        fieldset.setAttribute("aria-labelledby", `question-${index}-legend`);
+
+        const legend = document.createElement("legend");
+        legend.id = `question-${index}-legend`;
+        legend.textContent = `Question ${index + 1}. ${question.text}`;
+        fieldset.appendChild(legend);
+
+        const optionsWrapper = document.createElement("div");
+        optionsWrapper.className = "options";
+
+        [
+          { label: "Vrai", value: "true" },
+          { label: "Faux", value: "false" },
+        ].forEach((option) => {
+          const optionId = `question-${index}-${option.value}`;
+          const label = document.createElement("label");
+          label.setAttribute("for", optionId);
+
+          const input = document.createElement("input");
+          input.type = "radio";
+          input.name = `question-${index}`;
+          input.id = optionId;
+          input.value = option.value;
+          input.required = true;
+
+          label.appendChild(input);
+          label.append(option.label);
+          optionsWrapper.appendChild(label);
+        });
+
+        fieldset.appendChild(optionsWrapper);
+
+        const feedback = document.createElement("p");
+        feedback.id = `feedback-${index}`;
+        feedback.className = "feedback";
+        feedback.setAttribute("role", "status");
+        fieldset.appendChild(feedback);
+
+        return fieldset;
+      }
+
+      quizData.forEach((question, index) => {
+        quizForm.appendChild(createQuestionItem(question, index));
+      });
+
+      quizForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+
+        let correctAnswers = 0;
+        let unanswered = 0;
+
+        quizData.forEach((question, index) => {
+          const selected = quizForm.querySelector(
+            `input[name="question-${index}"]:checked`
+          );
+          const feedback = document.getElementById(`feedback-${index}`);
+
+          feedback.textContent = "";
+          feedback.classList.remove("correct", "incorrect", "unanswered");
+
+          if (!selected) {
+            unanswered += 1;
+            feedback.textContent = "⚠️ Veuillez répondre à cette question.";
+            feedback.classList.add("unanswered");
+            return;
+          }
+
+          const userAnswer = selected.value === "true";
+          if (userAnswer === question.answer) {
+            correctAnswers += 1;
+            feedback.textContent = "✅ Bonne réponse !";
+            feedback.classList.add("correct");
+          } else {
+            const goodAnswer = question.answer ? "Vrai" : "Faux";
+            feedback.textContent = `❌ Mauvaise réponse. La bonne réponse est ${goodAnswer}.`;
+            feedback.classList.add("incorrect");
+          }
+        });
+
+        const totalQuestions = quizData.length;
+        const scoreMessage = document.createElement("p");
+        scoreMessage.className = "score";
+        scoreMessage.textContent = `Score : ${correctAnswers} / ${totalQuestions}`;
+
+        const adviceMessage = document.createElement("p");
+        if (unanswered > 0) {
+          adviceMessage.textContent =
+            "Répondez à toutes les questions pour obtenir votre score complet.";
+        } else if (correctAnswers === totalQuestions) {
+          adviceMessage.textContent =
+            "Excellent ! Vous êtes prêt·e à repérer les arnaques en ligne.";
+        } else if (correctAnswers >= totalQuestions * 0.7) {
+          adviceMessage.textContent =
+            "Très bien ! Encore un effort et vous deviendrez un véritable détective du numérique.";
+        } else {
+          adviceMessage.textContent =
+            "Revoir les notions de cybersécurité vous aidera à gagner en vigilance.";
+        }
+
+        resultContainer.innerHTML = "";
+        resultContainer.appendChild(scoreMessage);
+        resultContainer.appendChild(adviceMessage);
+      });
+    </script>
+  </body>
+</html>
